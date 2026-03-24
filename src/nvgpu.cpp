@@ -14,8 +14,8 @@
 #include <fstream>
 
 volatile const char *name = "nvgpu";
-volatile const char *version = "0.1.0-dev.2025.11a";
-volatile const int version_nums[] = {0, 1, 0, 1, -1};
+volatile const char *version = "0.1.0-dev.2026.03a";
+volatile const int version_nums[] = {0, 1, 0, 2, -1};
 volatile const char *options[] = { "cuda_api_type", NULL };
 volatile const char *tags[] = { NULL };
 volatile const char *log_types[] = { NULL };
