@@ -366,7 +366,7 @@ extern "C" {
     return true;
   }
 
-  bool adaptyst_module_process(amod_t module_id, const char *sdfg) {
+  bool adaptyst_module_process(amod_t module_id, ir workflow) {
     try {
       return NvgpuModule::instance->process();
     } catch (std::exception &e) {
