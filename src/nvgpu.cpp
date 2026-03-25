@@ -14,8 +14,8 @@
 #include <fstream>
 
 volatile const char *name = "nvgpu";
-volatile const char *version = "0.1.0-dev.2025.11a";
-volatile const int version_nums[] = {0, 1, 0, 1, -1};
+volatile const char *version = "0.1.0-dev.2026.03a";
+volatile const int version_nums[] = {0, 1, 0, 2, -1};
 volatile const char *options[] = { "cuda_api_type", NULL };
 volatile const char *tags[] = { NULL };
 volatile const char *log_types[] = { NULL };
@@ -59,11 +59,21 @@ public:
 
     const char *msg;
 
-    if (!adaptyst_receive_string(this->module_id, &msg)) {
-      adaptyst_set_error(this->module_id, "Error when receiving injection "
-                         "data from the workflow");
-      return false;
-    }
+    do {
+      if (!adaptyst_receive_string_timeout(this->module_id, &msg, 1)) {
+        if (adaptyst_get_internal_error_code(this->module_id) == ADAPTYST_ERR_TIMEOUT) {
+          if (!adaptyst_is_workflow_running(this->module_id)) {
+            adaptyst_set_error(this->module_id, "The workflow has finished without sending "
+                               "the required injection data");
+            return false;
+          }
+        } else {
+          adaptyst_set_error(this->module_id, "Error when receiving injection "
+                             "data from the workflow");
+          return false;
+        }
+      }
+    } while (!msg);
 
     std::string request(msg);
 
@@ -356,7 +366,7 @@ extern "C" {
     return true;
   }
 
-  bool adaptyst_module_process(amod_t module_id, const char *sdfg) {
+  bool adaptyst_module_process(amod_t module_id, ir workflow) {
     try {
       return NvgpuModule::instance->process();
     } catch (std::exception &e) {
